@@ -16,7 +16,7 @@ export default function AuthCallback() {
             login(token, { id: payload.id, username: payload.username, email: payload.email || '' });
             navigate('/');
         } else {
-            navigate('/login');
+            navigate('/login', { replace: true });
         }
     }, []);
 

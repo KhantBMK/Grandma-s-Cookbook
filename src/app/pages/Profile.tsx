@@ -23,7 +23,7 @@ export default function Profile() {
 
     useEffect(() => {
         if (!isLoggedIn) {
-            navigate('/login');
+            navigate('/login', { replace: true });
             return;
         }
         if (user) {

@@ -48,7 +48,7 @@ export default function RecipeDetail() {
     }, [recipe, isLoggedIn, user]);
 
     const handleSave = async () => {
-        if (!isLoggedIn) { navigate('/login'); return; }
+        if (!isLoggedIn) { navigate('/login', { replace: true }); return; }
         if (saved) {
             await api.delete(`/users/${id}/save`, true);
             setSaved(false);

@@ -102,7 +102,7 @@ export default function CreateRecipe() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        if (!isLoggedIn) { navigate('/login'); return; }
+        if (!isLoggedIn) { navigate('/login', { replace: true }); return; }
         api.get('/reference/cuisines').then(setCuisines);
         api.get('/reference/meal-types').then(setMealTypes);
         api.get('/reference/tags').then(setAllTags);
