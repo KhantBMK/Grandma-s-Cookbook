@@ -1,0 +1,6 @@
+I would like you to make some changes/ fixes to the frontend first before we work on the server. I want you to remove the ability
+  to create a recipe if you're not logged in so that means I want that tab in the nav bar removed if you're not logged in. I also
+  want you to remove the servings size options buttons in the recipe details. Also I want you to remove the share recipe buttons. I
+  also want you to fix it so when I log in using continue with google email will redirect me to the home page when logged in and
+  not redirect be to the login page when I got in. I also got the following error when I tried creating a new recipe: Failed to
+  load resource: net::ERR_ALPN_NEGOTIATION_FAILED.
