@@ -21,12 +21,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [token, setToken] = useState<string | null>(null);
 
     useEffect(() => {
-        const savedToken = localStorage.getItem('token');
-        const savedUser = localStorage.getItem('user');
-        if (savedToken && savedUser) {
-            setToken(savedToken);
-            setUser(JSON.parse(savedUser));
-        }
+        const syncFromStorage = () => {
+            const savedToken = localStorage.getItem('token');
+            const savedUser = localStorage.getItem('user');
+            if (savedToken && savedUser) {
+                setToken(savedToken);
+                setUser(JSON.parse(savedUser));
+            } else {
+                setToken(null);
+                setUser(null);
+            }
+        };
+
+        syncFromStorage();
+
+        const handlePageShow = (e: PageTransitionEvent) => {
+            if (e.persisted) syncFromStorage();
+        };
+
+        window.addEventListener('pageshow', handlePageShow);
+        return () => window.removeEventListener('pageshow', handlePageShow);
     }, []);
 
     const login = (token: string, user: User) => {
