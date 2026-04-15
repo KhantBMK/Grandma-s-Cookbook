@@ -14,7 +14,7 @@ export default function AuthCallback() {
             // Decode the JWT payload to get user info
             const payload = JSON.parse(atob(token.split('.')[1]));
             login(token, { id: payload.id, username: payload.username, email: payload.email || '' });
-            navigate('/');
+            navigate('/', { replace: true });
         } else {
             navigate('/login', { replace: true });
         }

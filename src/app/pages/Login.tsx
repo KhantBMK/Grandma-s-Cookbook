@@ -30,7 +30,7 @@ export default function Login() {
                 if (data.error) { setError(data.error); return; }
                 login(data.token, data.user);
             }
-            navigate('/');
+            navigate('/', { replace: true });
         } catch {
             setError('Something went wrong. Please try again.');
         } finally {
