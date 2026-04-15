@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Navigation } from "../components/Navigation";
 import { Mail, Lock, User } from "lucide-react";
@@ -7,7 +7,11 @@ import { api } from "../../api";
 
 export default function Login() {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, isLoggedIn } = useAuth();
+
+    useEffect(() => {
+        if (isLoggedIn) navigate('/', { replace: true });
+    }, [isLoggedIn]);
     const [mode, setMode] = useState<'login' | 'register'>('login');
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
