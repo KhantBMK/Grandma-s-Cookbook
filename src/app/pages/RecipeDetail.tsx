@@ -92,12 +92,18 @@ export default function RecipeDetail() {
             <div className="max-w-7xl mx-auto px-6 py-8">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Image */}
-                    <div className="border-2 border-orange-900/20 rounded-3xl overflow-hidden">
-                        <img
-                            src={recipe.image_url || 'https://images.unsplash.com/photo-1617735605078-8a9336be0816?w=800'}
-                            alt={recipe.name}
-                            className="w-full aspect-square object-cover"
-                        />
+                    <div className="border-2 border-orange-900/20 rounded-3xl overflow-hidden aspect-square">
+                        {recipe.image_url ? (
+                            <img
+                                src={recipe.image_url}
+                                alt={recipe.name}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-orange-50 flex items-center justify-center">
+                                <span className="text-orange-900/40 text-lg">No image provided</span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Info */}

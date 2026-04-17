@@ -108,7 +108,7 @@ const createRecipe = async (req, res) => {
     const connection = await pool.getConnection();
     try {
         const {
-            name, prep_time, cook_time, servings, description, cuisine_id, meal_type_id, image_url, ingredients, instructions, tag_ids
+            name, prep_time, cook_time, servings, description, cuisine_id, meal_type_id, image_url, ingredients, instructions, tag_ids, new_tags
         } = req.body;
 
         await connection.beginTransaction();
@@ -132,6 +132,14 @@ const createRecipe = async (req, res) => {
             await connection.query('INSERT INTO tags_recipes (tag_id, recipe_id) VALUES ?', [tagRows]);
         }
 
+        if (new_tags && new_tags.length > 0) {
+            for (const tagName of new_tags) {
+                await connection.query('INSERT IGNORE INTO tags (name) VALUES (?)', [tagName.trim()]);
+                const [[tag]] = await connection.query('SELECT id FROM tags WHERE name = ?', [tagName.trim()]);
+                await connection.query('INSERT IGNORE INTO tags_recipes (tag_id, recipe_id) VALUES (?, ?)', [tag.id, recipeId]);
+            }
+        }
+
         await connection.commit();
 
         res.status(201).json({message: 'Recipe created', recipeId});
@@ -148,7 +156,7 @@ const updateRecipe = async (req, res) => {
     const connection = await pool.getConnection();
     try {
         const {id} = req.params;
-        const {name, prep_time, cook_time, servings, description, cuisine_id, meal_type_id, image_url, ingredients, instructions, tag_ids} = req.body;
+        const {name, prep_time, cook_time, servings, description, cuisine_id, meal_type_id, image_url, ingredients, instructions, tag_ids, new_tags} = req.body;
         await connection.beginTransaction();
         await connection.query(`UPDATE recipes SET name = ?, prep_time = ?, cook_time = ?, servings = ?, description = ?, cuisine_type = ?, meal_type = ?, image_url = ? WHERE id = ? AND user_id = ?`, [name, prep_time, cook_time, servings, description, cuisine_id, meal_type_id, image_url, id, req.user.id]);
         await connection.query('DELETE FROM ingredients WHERE recipe_id = ?', [id]);
@@ -168,6 +176,14 @@ const updateRecipe = async (req, res) => {
         if (tag_ids && tag_ids.length > 0) {
             const tagRows = tag_ids.map(tagId => [tagId, id]);
             await connection.query('INSERT INTO tags_recipes (tag_id, recipe_id) VALUES ?', [tagRows]);
+        }
+
+        if (new_tags && new_tags.length > 0) {
+            for (const tagName of new_tags) {
+                await connection.query('INSERT IGNORE INTO tags (name) VALUES (?)', [tagName.trim()]);
+                const [[tag]] = await connection.query('SELECT id FROM tags WHERE name = ?', [tagName.trim()]);
+                await connection.query('INSERT IGNORE INTO tags_recipes (tag_id, recipe_id) VALUES (?, ?)', [tag.id, id]);
+            }
         }
 
         await connection.commit();

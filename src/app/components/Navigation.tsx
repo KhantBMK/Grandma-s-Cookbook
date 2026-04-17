@@ -44,15 +44,17 @@ export function Navigation() {
             <Search className="w-4 h-4" />
             <span className="text-sm">Browse</span>
           </Link>
-          <Link
-            to="/create"
-            className={`flex items-center gap-2 transition-colors ${
-              location.pathname === "/create" ? "text-orange-600" : "text-orange-900/60 hover:text-orange-600"
-            }`}
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span className="text-sm">Create</span>
-          </Link>
+          {isLoggedIn && (
+            <Link
+              to="/create"
+              className={`flex items-center gap-2 transition-colors ${
+                location.pathname === "/create" ? "text-orange-600" : "text-orange-900/60 hover:text-orange-600"
+              }`}
+            >
+              <PlusCircle className="w-4 h-4" />
+              <span className="text-sm">Create</span>
+            </Link>
+          )}
           {isLoggedIn ? (
             <>
               <Link

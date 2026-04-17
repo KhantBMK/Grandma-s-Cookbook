@@ -16,11 +16,17 @@ export default function RecipeCard({ id, name, image_url, cook_time, servings, c
         <Link to={`/recipe/${id}`} className="group">
             <div className="bg-white border-2 border-orange-900/20 rounded-2xl overflow-hidden hover:border-orange-600 transition-all">
                 <div className="aspect-square overflow-hidden">
-                    <img
-                        src={image_url || 'https://images.unsplash.com/photo-1617735605078-8a9336be0816?w=400'}
-                        alt={name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
+                    {image_url ? (
+                        <img
+                            src={image_url}
+                            alt={name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                    ) : (
+                        <div className="w-full h-full bg-orange-50 flex items-center justify-center">
+                            <span className="text-orange-900/40 text-sm">No image provided</span>
+                        </div>
+                    )}
                 </div>
                 <div className="p-4">
                     <div className="flex gap-2 mb-2 flex-wrap">

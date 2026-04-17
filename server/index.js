@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
     res.json({message: "Grandmas Cookbook API is running"});
 });
 
-// Planned routes
+// Routes
 app.use('/api/recipes', require('./routes/recipes'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));

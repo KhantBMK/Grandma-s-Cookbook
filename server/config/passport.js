@@ -20,7 +20,6 @@ passport.use(new GoogleStrategy ({
                 return done(null, {token});
             }
 
-            // Email already exists from local signup — link Google to that account
             const [byEmail] = await pool.query(
                 'SELECT id, username, email FROM users WHERE email = ?', [email]
             );
