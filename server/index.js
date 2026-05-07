@@ -7,7 +7,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL || '*',
+    credentials: true
+}));
 app.use(express.json());
 app.use(passport.initialize());
 
@@ -22,6 +25,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/reference', require('./routes/reference'));
 app.use('/api/upload', require('./routes/upload'));
+app.use('/api/ai', require('./routes/ai'));
 
 // Server listening
 app.listen(PORT, () => {

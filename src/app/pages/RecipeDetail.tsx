@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { Navigation } from "../components/Navigation";
-import { Clock, Users, Bookmark, Share2, ChefHat, Trash2 } from "lucide-react";
+import { Clock, Users, Bookmark, ChefHat, Trash2, Pencil } from "lucide-react";
 import { api } from "../../api";
 import { useAuth } from "../../context/AuthContext";
 
@@ -28,7 +28,6 @@ export default function RecipeDetail() {
     const [recipe, setRecipe] = useState<Recipe | null>(null);
     const [loading, setLoading] = useState(true);
     const [saved, setSaved] = useState(false);
-    const [multiplier, setMultiplier] = useState(1);
 
     useEffect(() => {
         api.get(`/recipes/${id}`).then(data => {
@@ -64,14 +63,6 @@ export default function RecipeDetail() {
         navigate('/search');
     };
 
-    const scaleIngredient = (text: string, scale: number): string => {
-        if (scale === 1) return text;
-        return text.replace(/(\d+(?:\.\d+)?)/g, (match) => {
-            const scaled = parseFloat(match) * scale;
-            return scaled % 1 === 0 ? String(scaled) : scaled.toFixed(1);
-        });
-    };
-
     if (loading) return (
         <div className="min-h-screen bg-[#f5f1e8]">
             <Navigation />
@@ -101,7 +92,11 @@ export default function RecipeDetail() {
                             />
                         ) : (
                             <div className="w-full h-full bg-orange-50 flex items-center justify-center">
-                                <span className="text-orange-900/40 text-lg">No image provided</span>
+                                <svg viewBox="0 0 64 64" className="w-2/5 h-2/5 text-orange-300" fill="currentColor">
+                                    <rect x="6" y="34" width="20" height="20" rx="2" />
+                                    <polygon points="32,10 52,38 12,38" />
+                                    <circle cx="48" cy="46" r="10" />
+                                </svg>
                             </div>
                         )}
                     </div>
@@ -124,12 +119,20 @@ export default function RecipeDetail() {
                                     <Bookmark className="w-6 h-6" fill={saved ? 'currentColor' : 'none'} />
                                 </button>
                                 {isOwner && (
-                                    <button
-                                        onClick={handleDelete}
-                                        className="p-3 rounded-full border-2 border-red-200 text-red-400 hover:bg-red-50 transition-all"
-                                    >
-                                        <Trash2 className="w-6 h-6" />
-                                    </button>
+                                    <>
+                                        <button
+                                            onClick={() => navigate(`/recipe/${id}/edit`)}
+                                            className="p-3 rounded-full border-2 border-orange-900/20 text-orange-900/60 hover:border-orange-600 hover:text-orange-600 transition-all"
+                                        >
+                                            <Pencil className="w-6 h-6" />
+                                        </button>
+                                        <button
+                                            onClick={handleDelete}
+                                            className="p-3 rounded-full border-2 border-red-200 text-red-400 hover:bg-red-50 transition-all"
+                                        >
+                                            <Trash2 className="w-6 h-6" />
+                                        </button>
+                                    </>
                                 )}
                             </div>
                         </div>
@@ -161,37 +164,18 @@ export default function RecipeDetail() {
                             </div>
                         )}
 
-                        <button className="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-lg transition-colors flex items-center justify-center gap-2">
-                            <Share2 className="w-5 h-5" />
-                            Share Recipe
-                        </button>
                     </div>
                 </div>
 
                 {/* Ingredients & Instructions */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="border-2 border-orange-900/20 rounded-3xl p-8 bg-white">
-                        <div className="flex items-center justify-between mb-6 pb-3 border-b-2 border-orange-900/20">
-                            <h2 className="text-2xl text-orange-900">Ingredients</h2>
-                            <div className="flex items-center gap-2">
-                                {[1, 2, 4, 8].map(n => (
-                                    <button
-                                        key={n}
-                                        onClick={() => setMultiplier(n)}
-                                        className={`px-3 py-1 rounded-lg text-sm transition-all ${
-                                            multiplier === n ? 'bg-orange-600 text-white' : 'bg-white border-2 border-orange-900/20 text-orange-900/70 hover:border-orange-600 hover:text-orange-600'
-                                        }`}
-                                    >
-                                        {n}x
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
+                        <h2 className="text-2xl text-orange-900 mb-6 pb-3 border-b-2 border-orange-900/20">Ingredients</h2>
                         <ul className="space-y-3">
                             {recipe.ingredients.map(ing => (
                                 <li key={ing.id} className="flex items-start gap-3 text-orange-900/80">
                                     <span className="text-orange-600 mt-1">•</span>
-                                    <span>{scaleIngredient(ing.ingredient_desc, multiplier)}</span>
+                                    <span>{ing.ingredient_desc}</span>
                                 </li>
                             ))}
                         </ul>

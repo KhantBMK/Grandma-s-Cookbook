@@ -9,12 +9,13 @@ interface RecipeCardProps {
     servings: number;
     cuisine: string;
     meal_type: string;
+    is_recommended?: boolean;
 }
 
-export default function RecipeCard({ id, name, image_url, cook_time, servings, cuisine, meal_type }: RecipeCardProps) {
+export default function RecipeCard({ id, name, image_url, cook_time, servings, cuisine, meal_type, is_recommended = false }: RecipeCardProps) {
     return (
         <Link to={`/recipe/${id}`} className="group">
-            <div className="bg-white border-2 border-orange-900/20 rounded-2xl overflow-hidden hover:border-orange-600 transition-all">
+            <div className={`bg-white rounded-2xl overflow-hidden transition-all ${is_recommended ? 'border-4 border-pink-400 hover:border-pink-600' : 'border-2 border-orange-900/20 hover:border-orange-600'}`}>
                 <div className="aspect-square overflow-hidden">
                     {image_url ? (
                         <img
@@ -24,7 +25,11 @@ export default function RecipeCard({ id, name, image_url, cook_time, servings, c
                         />
                     ) : (
                         <div className="w-full h-full bg-orange-50 flex items-center justify-center">
-                            <span className="text-orange-900/40 text-sm">No image provided</span>
+                            <svg viewBox="0 0 64 64" className="w-2/5 h-2/5 text-orange-300" fill="currentColor">
+                                <rect x="6" y="34" width="20" height="20" rx="2" />
+                                <polygon points="32,10 52,38 12,38" />
+                                <circle cx="48" cy="46" r="10" />
+                            </svg>
                         </div>
                     )}
                 </div>

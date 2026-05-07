@@ -1,6 +1,6 @@
 import { Navigation } from "../components/Navigation";
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Clock, Users, Upload, Plus, X } from "lucide-react";
 import { api } from "../../api";
 import { useAuth } from "../../context/AuthContext";
@@ -212,7 +212,8 @@ function Select({
     );
 }
 
-export default function CreateRecipe() {
+export default function EditRecipe() {
+    const { id } = useParams();
     const navigate = useNavigate();
     const { isLoggedIn } = useAuth();
 
@@ -221,6 +222,7 @@ export default function CreateRecipe() {
     const [cookTime, setCookTime] = useState("");
     const [servings, setServings] = useState("");
     const [description, setDescription] = useState("");
+    const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -245,14 +247,44 @@ export default function CreateRecipe() {
 
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
     const [aiTagsActive, setAiTagsActive] = useState(false);
 
     useEffect(() => {
         if (!isLoggedIn) { navigate('/login', { replace: true }); return; }
-        api.get('/reference/cuisines').then(setCuisines);
-        api.get('/reference/meal-types').then(setMealTypes);
-        api.get('/reference/tags').then(setAllTags);
-    }, [isLoggedIn]);
+
+        Promise.all([
+            api.get('/reference/cuisines'),
+            api.get('/reference/meal-types'),
+            api.get('/reference/tags'),
+            api.get(`/recipes/${id}`),
+        ]).then(([cuisinesData, mealTypesData, tagsData, recipeData]) => {
+            setCuisines(cuisinesData);
+            setMealTypes(mealTypesData);
+            setAllTags(tagsData);
+
+            setName(recipeData.name);
+            setPrepTime(String(recipeData.prep_time));
+            setCookTime(String(recipeData.cook_time));
+            setServings(String(recipeData.servings));
+            setDescription(recipeData.description ?? "");
+            setExistingImageUrl(recipeData.image_url || null);
+            setIngredients(recipeData.ingredients.map((i: { ingredient_desc: string }) => i.ingredient_desc));
+            setDirections(
+                [...recipeData.instructions]
+                    .sort((a: { step_num: number }, b: { step_num: number }) => a.step_num - b.step_num)
+                    .map((i: { instruction_desc: string }) => i.instruction_desc)
+            );
+            setSelectedTags(recipeData.tags.map((t: { id: number }) => t.id));
+
+            const cuisine = cuisinesData.find((c: Option) => c.name === recipeData.cuisine);
+            if (cuisine) setSelectedCuisine(cuisine.id);
+            const mealType = mealTypesData.find((m: Option) => m.name === recipeData.meal_type);
+            if (mealType) setSelectedMealType(mealType.id);
+
+            setLoading(false);
+        });
+    }, [isLoggedIn, id]);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -321,7 +353,7 @@ export default function CreateRecipe() {
                 }
             }
 
-            let image_url = '';
+            let image_url = existingImageUrl || '';
             if (imageFile) {
                 const formData = new FormData();
                 formData.append('image', imageFile);
@@ -344,11 +376,11 @@ export default function CreateRecipe() {
                 instructions: directions,
             };
 
-            const result = await api.post('/recipes', body, true);
-            if (result.recipeId) {
-                navigate(`/recipe/${result.recipeId}`);
+            const result = await api.put(`/recipes/${id}`, body, true);
+            if (result.message === 'Recipe updated') {
+                navigate(`/recipe/${id}`);
             } else {
-                setError(result.message ?? 'Failed to create recipe.');
+                setError(result.error ?? 'Failed to update recipe.');
             }
         } catch {
             setError('Something went wrong. Please try again.');
@@ -357,13 +389,22 @@ export default function CreateRecipe() {
         }
     };
 
+    if (loading) return (
+        <div className="min-h-screen bg-[#f5f1e8]">
+            <Navigation />
+            <div className="flex items-center justify-center py-32">
+                <p className="text-orange-900/60 text-lg">Loading recipe...</p>
+            </div>
+        </div>
+    );
+
     return (
         <div className="min-h-screen bg-[#f5f1e8]">
             <Navigation />
 
             <div className="max-w-5xl mx-auto px-6 py-8">
                 <div className="border-2 border-orange-900/20 rounded-3xl p-8 md:p-12 bg-white">
-                    <h1 className="text-4xl text-orange-900 mb-8 text-center">Create New Recipe</h1>
+                    <h1 className="text-4xl text-orange-900 mb-8 text-center">Update Recipe</h1>
 
                     {error && (
                         <div className="mb-6 px-4 py-3 bg-red-50 border-2 border-red-200 rounded-lg text-red-600 text-sm">
@@ -402,8 +443,8 @@ export default function CreateRecipe() {
                             className="border-2 border-dashed border-orange-900/20 rounded-2xl overflow-hidden bg-orange-50 hover:border-orange-600 transition-colors cursor-pointer"
                             onClick={() => fileInputRef.current?.click()}
                         >
-                            {imagePreview ? (
-                                <img src={imagePreview} alt="Preview" className="w-full h-64 object-cover" />
+                            {imagePreview || existingImageUrl ? (
+                                <img src={imagePreview ?? existingImageUrl!} alt="Preview" className="w-full h-64 object-cover" />
                             ) : (
                                 <div className="w-full h-64 flex flex-col items-center justify-center text-orange-900/40">
                                     <Upload className="w-12 h-12 mb-3" />
@@ -613,7 +654,7 @@ export default function CreateRecipe() {
                             disabled={submitting}
                             className="bg-orange-600 hover:bg-orange-700 disabled:opacity-50 text-white px-8 py-3 rounded-lg flex items-center gap-2 transition-colors text-lg"
                         >
-                            {submitting ? 'Creating...' : 'Create'}
+                            {submitting ? 'Updating...' : 'Update'}
                         </button>
                     </div>
                 </div>
